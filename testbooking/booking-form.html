@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Meeting Room Booking</title>
+  </head>
+  <body>
+    <h1>Meeting Room Booking Form</h1>
+    <form id="bookingForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br /><br />
+
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="date" required /><br /><br />
+
+      <label for="phone">Phone:</label>
+      <input type="text" id="phone" name="phone" required /><br /><br />
+
+      <label for="department">Department:</label>
+      <input
+        type="text"
+        id="department"
+        name="department"
+        required
+      /><br /><br />
+
+      <label for="startTime">Start Time:</label>
+      <input type="time" id="startTime" name="startTime" required /><br /><br />
+
+      <label for="endTime">End Time:</label>
+      <input type="time" id="endTime" name="endTime" required /><br /><br />
+
+      <label for="title">Meeting Title:</label>
+      <input type="text" id="title" name="title" null /><br /><br />
+
+      <button type="submit">Book Room</button>
+    </form>
+
+    <script>
+      document
+        .getElementById("bookingForm")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(event.target);
+          const requestOptions = {
+            method: "POST",
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: { "Content-Type": "application/json" },
+          };
+
+          try {
+            const response = await fetch(
+              "http://localhost:3000/booking1/create",
+              requestOptions
+            );
+            if (response.status === 409) {
+              alert("Room not available for the specified time slot");
+            } else if (response.status === 201) {
+              alert("Booking successful!");
+            } else {
+              alert("An error occurred. Please try again.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+          }
+        });
+    </script>
+  </body>
+</html>
