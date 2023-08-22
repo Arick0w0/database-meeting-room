@@ -63,39 +63,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-// Function to check if a booking is available for the specified time slot
-// async function isBookingAvailable(roomNumber, date, startTime, endTime) {
-//   try {
-//     const existingBooking = await Booking.findOne({
-//       roomNumber,
-//       date,
-//       $or: [
-//         {
-//           $and: [
-//             { startTime: { $lte: startTime } },
-//             { endTime: { $gt: startTime } },
-//           ],
-//         },
-//         {
-//           $and: [
-//             { startTime: { $lt: endTime } },
-//             { endTime: { $gte: endTime } },
-//           ],
-//         },
-//         {
-//           $and: [
-//             { startTime: { $gte: startTime } },
-//             { endTime: { $lte: endTime } },
-//           ],
-//         },
-//       ],
-//     });
-//     return !existingBooking; // Return true if no overlapping booking found, false otherwise
-//   } catch (error) {
-//     console.error("Error checking booking availability:", error);
-//     return false; // Return false in case of any error
-//   }
-// }
+// Function to check if a booking is available for the specified time slot and cancel the booking
 
 async function isBookingAvailable(roomNumber, date, startTime, endTime) {
   try {
@@ -174,20 +142,20 @@ router.put("/update/:phone", async (req, res) => {
 });
 
 // Delete a booking by phone number
-// router.delete("/delete/:phone", async (req, res) => {
-//   try {
-//     const phoneNumber = req.params.phone;
-//     const deletedBooking = await Booking.findOneAndDelete({
-//       phone: phoneNumber,
-//     });
-//     if (!deletedBooking) {
-//       return res.status(404).json({ error: "Booking not found" });
-//     }
-//     res.status(200).json({ message: "Booking deleted successfully" });
-//   } catch (error) {
-//     res.status(500).json({ error: "Server error" });
-//   }
-// });
+router.delete("/delete/:phone", async (req, res) => {
+  try {
+    const phoneNumber = req.params.phone;
+    const deletedBooking = await Booking.findOneAndDelete({
+      phone: phoneNumber,
+    });
+    if (!deletedBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // Update booking status by phone number
 router.put("/cancel/:phone", async (req, res) => {
