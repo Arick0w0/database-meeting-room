@@ -1,3 +1,4 @@
+// model/Booking.js
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
@@ -10,6 +11,10 @@ const bookingSchema = new mongoose.Schema(
     department: { type: String, required: true },
     title: { type: String, default: null },
     roomNumber: { type: Number, required: true },
+    isActive: {
+      type: Boolean,
+      default: true, // Booking is active by default
+    },
   },
   {
     collection: "booking_1", // Change the collection name here}
