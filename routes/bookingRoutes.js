@@ -70,7 +70,7 @@ async function isBookingAvailable(roomNumber, date, startTime, endTime) {
     const existingBooking = await Booking.findOne({
       roomNumber,
       date,
-      isActive: true, // Only consider active (not canceled) bookings
+      isActive: 1, // Consider only active (not canceled) bookings
       $or: [
         {
           $and: [
@@ -188,6 +188,43 @@ router.get("/room/:roomNumber", async (req, res) => {
     res.status(200).json(bookings);
   } catch (error) {
     errorHandler(res, error);
+  }
+});
+
+// Get bookings by isActive status
+// router.get("/status/:status", async (req, res) => {
+//   try {
+//     const status = req.params.status; // Get the status from the request parameters
+//     const isActive = status === "active" ? 1 : 0; // Convert the status to 1 or 0
+
+//     // Query the database to find bookings with the specified isActive status
+//     const bookings = await Booking.find({ isActive });
+
+//     res.status(200).json(bookings);
+//   } catch (error) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// Get bookings by Room_number and isActive status
+router.get("/room/:roomNumber/:status", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+    const status = req.params.status; // Get the status from the request parameters
+    const isActive = status === "active" ? 1 : 0; // Convert the status to 1 or 0
+
+    // Query the database to find bookings with the specified room number and isActive status
+    const bookings = await Booking.find({ roomNumber, isActive }).sort({
+      startTime: 1,
+    });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({ error: "No bookings found for this room" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
   }
 });
 
