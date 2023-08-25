@@ -3,6 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking.js");
+const Room = require("../models/Room.js"); // Import the Room model
 
 // Middleware for error handling
 const errorHandler = (res, error) => {
@@ -13,7 +14,6 @@ const errorHandler = (res, error) => {
 // Create a new booking with availability check
 router.post("/create", async (req, res) => {
   try {
-    // Extract necessary data from the request body
     const {
       roomNumber,
       name,
@@ -25,6 +25,14 @@ router.post("/create", async (req, res) => {
       title,
     } = req.body;
 
+    // Check if the specified room exists
+    const roomExists = await Room.exists({ roomNumber });
+    if (!roomExists) {
+      return res
+        .status(404)
+        .json({ error: "The specified room does not exist" });
+    }
+
     // Check if the room is available for the specified time slot
     const isAvailable = await isBookingAvailable(
       roomNumber,
@@ -33,14 +41,12 @@ router.post("/create", async (req, res) => {
       endTime
     );
 
-    // If the room is not available, send a conflict response
     if (!isAvailable) {
       return res
         .status(409)
         .json({ error: "Room not available for the specified time slot" });
     }
 
-    // Create a new booking instance
     const booking = new Booking({
       roomNumber,
       name,
@@ -52,13 +58,11 @@ router.post("/create", async (req, res) => {
       endTime,
     });
 
-    // Save the booking to the database and send the saved booking as a response
     const savedBooking = await booking.save();
     res
       .status(201)
       .json({ message: "Booking created successfully", booking: savedBooking });
   } catch (error) {
-    // If an error occurs during any step above, handle the error using the errorHandler
     errorHandler(res, error);
   }
 });
@@ -174,37 +178,6 @@ router.put("/cancel/:phone", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-// Get bookings by Room_number
-router.get("/room/:roomNumber", async (req, res) => {
-  try {
-    const roomNumber = req.params.roomNumber;
-    const bookings = await Booking.find({ roomNumber }).sort({ startTime: 1 });
-
-    if (bookings.length === 0) {
-      return res.status(404).json({ error: "No bookings found for this room" });
-    }
-
-    res.status(200).json(bookings);
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Get bookings by isActive status
-// router.get("/status/:status", async (req, res) => {
-//   try {
-//     const status = req.params.status; // Get the status from the request parameters
-//     const isActive = status === "active" ? 1 : 0; // Convert the status to 1 or 0
-
-//     // Query the database to find bookings with the specified isActive status
-//     const bookings = await Booking.find({ isActive });
-
-//     res.status(200).json(bookings);
-//   } catch (error) {
-//     res.status(500).json({ error: "Server error" });
-//   }
-// });
 
 // Get bookings by Room_number and isActive status
 router.get("/room/:roomNumber/:status", async (req, res) => {
