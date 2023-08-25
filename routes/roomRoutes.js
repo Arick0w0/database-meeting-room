@@ -11,7 +11,7 @@ const errorHandler = (res, error) => {
 // Create a new room
 router.post("/create", async (req, res) => {
   try {
-    const { address, title, description } = req.body;
+    const { address, title_room, description } = req.body;
 
     // Find the highest roomNumber currently in the collection
     const highestRoom = await Room.findOne().sort({ roomNumber: -1 });
@@ -22,7 +22,7 @@ router.post("/create", async (req, res) => {
     const room = new Room({
       roomNumber: newRoomNumber.toString(), // Convert to string
       address,
-      title,
+      title_room,
       description,
     });
 
@@ -51,12 +51,57 @@ router.get("/room/:roomNumber/bookings", async (req, res) => {
   }
 });
 
+// Get bookings by Room_All
+
 router.get("/", async (req, res) => {
   try {
     const bookings = await Room.find();
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Delete a room by roomNumber
+router.delete("/delete/:roomNumber", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+
+    // Find and delete the room
+    const deletedRoom = await Room.findOneAndDelete({ roomNumber });
+
+    if (!deletedRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    res.status(200).json({ message: "Room deleted successfully" });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+});
+
+// Update room details by roomNumber
+router.put("/update/:roomNumber", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+    const { address, title_room, description } = req.body;
+
+    // Find and update the room
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { address, title_room, description },
+      { new: true } // Return the updated room
+    );
+
+    if (!updatedRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Room updated successfully", room: updatedRoom });
+  } catch (error) {
+    errorHandler(res, error);
   }
 });
 
