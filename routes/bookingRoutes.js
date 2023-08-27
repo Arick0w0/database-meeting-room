@@ -6,10 +6,7 @@ const Booking = require("../models/Booking.js");
 const Room = require("../models/Room.js"); // Import the Room model
 
 // Middleware for error handling
-const errorHandler = (res, error) => {
-  console.error(error);
-  res.status(500).json({ error: "Server error" });
-};
+const { errorHandler } = require("../utils/helpers.js");
 
 // Create a new booking with availability check
 router.post("/create", async (req, res) => {

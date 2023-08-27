@@ -2,11 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Room = require("../models/Room.js"); // Import the Room model
 const Booking = require("../models/Booking.js");
-
-const errorHandler = (res, error) => {
-  console.error(error);
-  res.status(500).json({ error: "Server error" });
-};
+const { errorHandler } = require("../utils/helpers.js");
 
 // Create a new room
 router.post("/create", async (req, res) => {

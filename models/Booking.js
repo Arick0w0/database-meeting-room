@@ -18,7 +18,7 @@ const bookingSchema = new mongoose.Schema(
     },
   },
   {
-    collection: "booking_1", // Change the collection name here}
+    collection: "booking", // Change the collection name here}
     versionKey: false, // Exclude the __v field
   }
 );
