@@ -23,6 +23,4 @@ const bookingSchema = new mongoose.Schema(
   }
 );
 
-// Set the versionKey property to false to hide the __v field in the output
-// bookingSchema.set("toJSON", { versionKey: false });
 module.exports = mongoose.model("Booking", bookingSchema);

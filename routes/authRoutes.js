@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const { isAuthenticated } = require("../middleware/authMiddleware");
+const { errorHandler } = require("../utils/helpers.js");
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 

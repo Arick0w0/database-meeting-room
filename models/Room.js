@@ -1,3 +1,5 @@
+//models/Room.js
+
 const mongoose = require("mongoose");
 
 const roomSchema = new mongoose.Schema(
@@ -7,7 +9,7 @@ const roomSchema = new mongoose.Schema(
     description: { type: String, required: true },
     address: { type: String, required: true },
     isActive: { type: Boolean, default: true },
-    Image: { type: String, default: null },
+    image: { type: String, default: null },
   },
   {
     collection: "room2", // Change the collection name here}

@@ -4,14 +4,30 @@ const express = require("express");
 const router = express.Router();
 const Room = require("../models/Room.js"); // Import the Room model
 const Booking = require("../models/Booking.js");
+const multer = require("multer"); // Import multer for handling file uploads
+const path = require("path");
 
 // const errorHandler = require("../utils/helpers.js").errorHandler;
 const { errorHandler } = require("../utils/helpers.js");
 
+// Set up multer storage and file naming
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../uploads")); // Set the destination folder for uploaded images
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
+
 // Create a new room
-router.post("/create", async (req, res) => {
+router.post("/create", upload.single("image"), async (req, res) => {
   try {
-    const { address, title_room, description, image } = req.body;
+    const { address, title_room, description } = req.body;
+    const image = req.file ? req.file.filename : ""; // Get the uploaded image filename
 
     // Find the highest roomNumber currently in the collection
     const highestRoom = await Room.findOne().sort({ roomNumber: -1 });
