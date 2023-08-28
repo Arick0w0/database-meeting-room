@@ -1,13 +1,17 @@
+// routes/roomRoutes.js
+
 const express = require("express");
 const router = express.Router();
 const Room = require("../models/Room.js"); // Import the Room model
 const Booking = require("../models/Booking.js");
+
+// const errorHandler = require("../utils/helpers.js").errorHandler;
 const { errorHandler } = require("../utils/helpers.js");
 
 // Create a new room
 router.post("/create", async (req, res) => {
   try {
-    const { address, title_room, description } = req.body;
+    const { address, title_room, description, image } = req.body;
 
     // Find the highest roomNumber currently in the collection
     const highestRoom = await Room.findOne().sort({ roomNumber: -1 });
@@ -20,6 +24,7 @@ router.post("/create", async (req, res) => {
       address,
       title_room,
       description,
+      image,
     });
 
     const savedRoom = await room.save();
@@ -54,7 +59,7 @@ router.get("/", async (req, res) => {
     const bookings = await Room.find();
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -96,6 +101,49 @@ router.put("/update/:roomNumber", async (req, res) => {
     res
       .status(200)
       .json({ message: "Room updated successfully", room: updatedRoom });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+});
+// Activate a room by roomNumber
+router.put("/activate/:roomNumber", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+
+    // Find and update the room's isActive status to true
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!updatedRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    res.status(200).json({ message: "Room activated successfully" });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+});
+
+// Deactivate a room by roomNumber
+router.put("/deactivate/:roomNumber", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+
+    // Find and update the room's isActive status to false
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!updatedRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    res.status(200).json({ message: "Room deactivated successfully" });
   } catch (error) {
     errorHandler(res, error);
   }

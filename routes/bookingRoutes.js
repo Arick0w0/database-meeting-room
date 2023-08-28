@@ -106,7 +106,7 @@ router.get("/", async (req, res) => {
     const bookings = await Booking.find();
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -120,7 +120,7 @@ router.get("/:phone", async (req, res) => {
     }
     res.status(200).json(booking);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -138,7 +138,7 @@ router.put("/update/:phone", async (req, res) => {
     }
     res.status(200).json(updatedBooking);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -154,7 +154,7 @@ router.delete("/delete/:phone", async (req, res) => {
     }
     res.status(200).json({ message: "Booking deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -172,7 +172,7 @@ router.put("/cancel/:phone", async (req, res) => {
     }
     res.status(200).json({ message: "Booking canceled successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 
@@ -194,7 +194,7 @@ router.get("/room/:roomNumber/:status", async (req, res) => {
 
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    errorHandler(res, error);
   }
 });
 

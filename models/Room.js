@@ -1,4 +1,3 @@
-// models/roomSchema.js
 const mongoose = require("mongoose");
 
 const roomSchema = new mongoose.Schema(
@@ -7,9 +6,11 @@ const roomSchema = new mongoose.Schema(
     title_room: { type: String, required: true },
     description: { type: String, required: true },
     address: { type: String, required: true },
+    isActive: { type: Boolean, default: true },
+    Image: { type: String, default: null },
   },
   {
-    collection: "rooms_2", // Change the collection name here}
+    collection: "room2", // Change the collection name here}
     versionKey: false, // Exclude the __v field
   }
 );
