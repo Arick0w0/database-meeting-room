@@ -121,15 +121,25 @@ router.put("/update/:roomNumber", async (req, res) => {
     errorHandler(res, error);
   }
 });
-// Activate a room by roomNumber
-router.put("/activate/:roomNumber", async (req, res) => {
+// Activate or deactivate a room by roomNumber
+router.put("/status/:roomNumber", async (req, res) => {
   try {
     const roomNumber = req.params.roomNumber;
+    const { action } = req.body;
 
-    // Find and update the room's isActive status to true
+    let updatedStatus;
+    if (action === "activate") {
+      updatedStatus = true;
+    } else if (action === "deactivate") {
+      updatedStatus = false;
+    } else {
+      return res.status(400).json({ error: "Invalid action" });
+    }
+
+    // Find and update the room's isActive status
     const updatedRoom = await Room.findOneAndUpdate(
       { roomNumber },
-      { isActive: true },
+      { isActive: updatedStatus },
       { new: true }
     );
 
@@ -137,29 +147,11 @@ router.put("/activate/:roomNumber", async (req, res) => {
       return res.status(404).json({ error: "Room not found" });
     }
 
-    res.status(200).json({ message: "Room activated successfully" });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
+    const successMessage = updatedStatus
+      ? "Room activated successfully"
+      : "Room deactivated successfully";
 
-// Deactivate a room by roomNumber
-router.put("/deactivate/:roomNumber", async (req, res) => {
-  try {
-    const roomNumber = req.params.roomNumber;
-
-    // Find and update the room's isActive status to false
-    const updatedRoom = await Room.findOneAndUpdate(
-      { roomNumber },
-      { isActive: false },
-      { new: true }
-    );
-
-    if (!updatedRoom) {
-      return res.status(404).json({ error: "Room not found" });
-    }
-
-    res.status(200).json({ message: "Room deactivated successfully" });
+    res.status(200).json({ message: successMessage });
   } catch (error) {
     errorHandler(res, error);
   }

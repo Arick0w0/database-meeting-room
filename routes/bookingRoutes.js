@@ -1,16 +1,39 @@
-//routes/bookingRoutes.js
-
+//routes/bookingRoute.js
 const express = require("express");
 const router = express.Router();
 const Booking = require("../models/Booking.js");
-const Room = require("../models/Room.js"); // Import the Room model
+const Room = require("../models/Room.js");
 
 // Middleware for error handling
 const { errorHandler } = require("../utils/helpers.js");
 
 // Create a new booking with availability check
-router.post("/create", async (req, res) => {
+router.post("/create", createBooking);
+
+// Get all bookings
+router.get("/", getAllBookings);
+
+// Get a booking by phone number
+router.get("/:phone", getBookingByPhone);
+
+// Update a booking by phone number
+router.put("/update/:phone", updateBooking);
+
+// Delete a booking by phone number
+router.delete("/delete/:phone", deleteBooking);
+
+// Update booking status by phone number
+router.put("/cancel/:phone", cancelBooking);
+
+// Get bookings by Room_number and isActive status
+router.get("/room/:roomNumber/:status", getBookingsByRoomAndStatus);
+
+module.exports = router;
+
+// Create a new booking with availability check
+async function createBooking(req, res) {
   try {
+    // Extract data from request body
     const {
       roomNumber,
       name,
@@ -44,6 +67,7 @@ router.post("/create", async (req, res) => {
         .json({ error: "Room not available for the specified time slot" });
     }
 
+    // Create a new booking
     const booking = new Booking({
       roomNumber,
       name,
@@ -55,6 +79,7 @@ router.post("/create", async (req, res) => {
       endTime,
     });
 
+    // Save the booking
     const savedBooking = await booking.save();
     res
       .status(201)
@@ -62,10 +87,107 @@ router.post("/create", async (req, res) => {
   } catch (error) {
     errorHandler(res, error);
   }
-});
+}
+
+// Get all bookings
+async function getAllBookings(req, res) {
+  try {
+    const bookings = await Booking.find();
+    res.status(200).json(bookings);
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
+
+// Get a booking by phone number
+async function getBookingByPhone(req, res) {
+  try {
+    const phoneNumber = req.params.phone;
+    const booking = await Booking.findOne({ phone: phoneNumber });
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    res.status(200).json(booking);
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
+
+// Update a booking by phone number
+async function updateBooking(req, res) {
+  try {
+    const phoneNumber = req.params.phone;
+    const updatedBooking = await Booking.findOneAndUpdate(
+      { phone: phoneNumber },
+      req.body,
+      { new: true }
+    );
+    if (!updatedBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
+
+// Delete a booking by phone number
+async function deleteBooking(req, res) {
+  try {
+    const phoneNumber = req.params.phone;
+    const deletedBooking = await Booking.findOneAndDelete({
+      phone: phoneNumber,
+    });
+    if (!deletedBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking deleted successfully" });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
+
+// Update booking status by phone number
+async function cancelBooking(req, res) {
+  try {
+    const phoneNumber = req.params.phone;
+    const updatedBooking = await Booking.findOneAndUpdate(
+      { phone: phoneNumber },
+      { isActive: false }, // Set the isActive property to false
+      { new: true }
+    );
+    if (!updatedBooking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    res.status(200).json({ message: "Booking canceled successfully" });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
+
+// Get bookings by Room_number and isActive status
+async function getBookingsByRoomAndStatus(req, res) {
+  try {
+    const roomNumber = req.params.roomNumber;
+    const status = req.params.status; // Get the status from the request parameters
+    const isActive = status === "active" ? 1 : 0; // Convert the status to 1 or 0
+
+    // Query the database to find bookings with the specified room number and isActive status
+    const bookings = await Booking.find({ roomNumber, isActive }).sort({
+      startTime: 1,
+    });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({ error: "No bookings found for this room" });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    errorHandler(res, error);
+  }
+}
 
 // Function to check if a booking is available for the specified time slot and cancel the booking
-
 async function isBookingAvailable(roomNumber, date, startTime, endTime) {
   try {
     const existingBooking = await Booking.findOne({
@@ -99,103 +221,3 @@ async function isBookingAvailable(roomNumber, date, startTime, endTime) {
     return false; // Return false in case of any error
   }
 }
-
-// Get all bookings
-router.get("/", async (req, res) => {
-  try {
-    const bookings = await Booking.find();
-    res.status(200).json(bookings);
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Get a booking by phone number
-router.get("/:phone", async (req, res) => {
-  try {
-    const phoneNumber = req.params.phone;
-    const booking = await Booking.findOne({ phone: phoneNumber });
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-    res.status(200).json(booking);
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Update a booking by phone number
-router.put("/update/:phone", async (req, res) => {
-  try {
-    const phoneNumber = req.params.phone;
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { phone: phoneNumber },
-      req.body,
-      { new: true }
-    );
-    if (!updatedBooking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-    res.status(200).json(updatedBooking);
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Delete a booking by phone number
-router.delete("/delete/:phone", async (req, res) => {
-  try {
-    const phoneNumber = req.params.phone;
-    const deletedBooking = await Booking.findOneAndDelete({
-      phone: phoneNumber,
-    });
-    if (!deletedBooking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-    res.status(200).json({ message: "Booking deleted successfully" });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Update booking status by phone number
-router.put("/cancel/:phone", async (req, res) => {
-  try {
-    const phoneNumber = req.params.phone;
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { phone: phoneNumber },
-      { isActive: false }, // Set the isActive property to false
-      { new: true }
-    );
-    if (!updatedBooking) {
-      return res.status(404).json({ error: "Booking not found" });
-    }
-    res.status(200).json({ message: "Booking canceled successfully" });
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-// Get bookings by Room_number and isActive status
-router.get("/room/:roomNumber/:status", async (req, res) => {
-  try {
-    const roomNumber = req.params.roomNumber;
-    const status = req.params.status; // Get the status from the request parameters
-    const isActive = status === "active" ? 1 : 0; // Convert the status to 1 or 0
-
-    // Query the database to find bookings with the specified room number and isActive status
-    const bookings = await Booking.find({ roomNumber, isActive }).sort({
-      startTime: 1,
-    });
-
-    if (bookings.length === 0) {
-      return res.status(404).json({ error: "No bookings found for this room" });
-    }
-
-    res.status(200).json(bookings);
-  } catch (error) {
-    errorHandler(res, error);
-  }
-});
-
-module.exports = router;
