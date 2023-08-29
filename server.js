@@ -5,10 +5,12 @@ const session = require("express-session");
 const authRoutes = require("./routes/authRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+require("dotenv").config(); // Load environment variables from .env
 
 const app = express();
 const port = process.env.PORT || 3000;
-const mongoUri = "mongodb://127.0.0.1:27017/booking_db";
+// const mongoUri = "mongodb://127.0.0.1:27017/booking_db";
+const mongoUri = process.env.MONGO_URI; // Use the environment variable
 
 // Middleware
 app.use(cors());
