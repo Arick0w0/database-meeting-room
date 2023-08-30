@@ -121,25 +121,16 @@ router.put("/update/:roomNumber", async (req, res) => {
     errorHandler(res, error);
   }
 });
-// Activate or deactivate a room by roomNumber
-router.put("/status/:roomNumber", async (req, res) => {
+
+// Close a room by roomNumber
+router.put("/close/:roomNumber", async (req, res) => {
   try {
     const roomNumber = req.params.roomNumber;
-    const { action } = req.body;
 
-    let updatedStatus;
-    if (action === "activate") {
-      updatedStatus = true;
-    } else if (action === "deactivate") {
-      updatedStatus = false;
-    } else {
-      return res.status(400).json({ error: "Invalid action" });
-    }
-
-    // Find and update the room's isActive status
+    // Find and update the room's status to closed
     const updatedRoom = await Room.findOneAndUpdate(
       { roomNumber },
-      { isActive: updatedStatus },
+      { isOpen: false },
       { new: true }
     );
 
@@ -147,11 +138,29 @@ router.put("/status/:roomNumber", async (req, res) => {
       return res.status(404).json({ error: "Room not found" });
     }
 
-    const successMessage = updatedStatus
-      ? "Room activated successfully"
-      : "Room deactivated successfully";
+    res.status(200).json({ message: "Room closed successfully" });
+  } catch (error) {
+    errorHandler(res, error);
+  }
+});
 
-    res.status(200).json({ message: successMessage });
+// Open a room by roomNumber
+router.put("/open/:roomNumber", async (req, res) => {
+  try {
+    const roomNumber = req.params.roomNumber;
+
+    // Find and update the room's status to open
+    const updatedRoom = await Room.findOneAndUpdate(
+      { roomNumber },
+      { isOpen: true },
+      { new: true }
+    );
+
+    if (!updatedRoom) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+
+    res.status(200).json({ message: "Room opened successfully" });
   } catch (error) {
     errorHandler(res, error);
   }

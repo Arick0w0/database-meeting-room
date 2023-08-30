@@ -14,16 +14,16 @@ router.post("/create", createBooking);
 router.get("/", getAllBookings);
 
 // Get a booking by phone number
-router.get("/:phone", getBookingByPhone);
+router.get("/:id", getBookingById);
 
-// Update a booking by phone number
-router.put("/update/:phone", updateBooking);
+// Update a booking by id
+router.put("/update/:id", updateBooking);
 
-// Delete a booking by phone number
-router.delete("/delete/:phone", deleteBooking);
+// Delete a booking by id
+router.delete("/delete/:id", deleteBooking);
 
-// Update booking status by phone number
-router.put("/cancel/:phone", cancelBooking);
+// Update booking status by id
+router.put("/cancel/:id", cancelBooking);
 
 // Get bookings by Room_number and isActive status
 router.get("/room/:roomNumber/:status", getBookingsByRoomAndStatus);
@@ -100,13 +100,15 @@ async function getAllBookings(req, res) {
 }
 
 // Get a booking by phone number
-async function getBookingByPhone(req, res) {
+async function getBookingById(req, res) {
   try {
-    const phoneNumber = req.params.phone;
-    const booking = await Booking.findOne({ phone: phoneNumber });
+    const bookingId = req.params.id; // Change 'phone' to 'id' here
+    const booking = await Booking.findById(bookingId); // Use findById instead of findOne
+
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
+
     res.status(200).json(booking);
   } catch (error) {
     errorHandler(res, error);
@@ -116,28 +118,30 @@ async function getBookingByPhone(req, res) {
 // Update a booking by phone number
 async function updateBooking(req, res) {
   try {
-    const phoneNumber = req.params.phone;
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { phone: phoneNumber },
-      req.body,
+    const bookingId = req.params.id;
+    const updateData = req.body; // Data to update
+
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      updateData,
       { new: true }
     );
+
     if (!updatedBooking) {
       return res.status(404).json({ error: "Booking not found" });
     }
+
     res.status(200).json(updatedBooking);
   } catch (error) {
     errorHandler(res, error);
   }
 }
 
-// Delete a booking by phone number
+// Delete a booking by _id
 async function deleteBooking(req, res) {
   try {
-    const phoneNumber = req.params.phone;
-    const deletedBooking = await Booking.findOneAndDelete({
-      phone: phoneNumber,
-    });
+    const bookingId = req.params.id; // Change 'phone' to 'id' here
+    const deletedBooking = await Booking.findByIdAndDelete(bookingId);
     if (!deletedBooking) {
       return res.status(404).json({ error: "Booking not found" });
     }
@@ -147,16 +151,18 @@ async function deleteBooking(req, res) {
   }
 }
 
-// Update booking status by phone number
+// Update booking Cancel status by phone number
 async function cancelBooking(req, res) {
   try {
-    const phoneNumber = req.params.phone;
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { phone: phoneNumber },
-      { isActive: false }, // Set the isActive property to false
+    const bookingId = req.params.id;
+    console.log("Canceling booking with ID:", bookingId); // Add this line
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { isActive: false },
       { new: true }
     );
     if (!updatedBooking) {
+      console.log("Booking not found with ID:", bookingId); // Add this line
       return res.status(404).json({ error: "Booking not found" });
     }
     res.status(200).json({ message: "Booking canceled successfully" });

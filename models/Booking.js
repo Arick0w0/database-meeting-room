@@ -10,7 +10,7 @@ const bookingSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     department: { type: String, required: true },
     title: { type: String, default: null },
-    roomNumber: { type: String, required: true },
+    roomNumber: { type: Number, required: true },
     // room: { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true },
     isActive: {
       type: Boolean,
