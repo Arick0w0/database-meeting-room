@@ -12,8 +12,8 @@ const roomSchema = new mongoose.Schema(
     image: { type: String, default: null },
   },
   {
-    collection: "room3", // Change the collection name here
-    versionKey: false, // Exclude the __v field
+    collection: "room02",
+    versionKey: false,
   }
 );
 
