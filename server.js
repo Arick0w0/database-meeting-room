@@ -5,6 +5,7 @@ const session = require("express-session");
 const authRoutes = require("./routes/authRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const roomRoutes = require("./routes/roomRoutes");
+const path = require("path");
 require("dotenv").config(); // Load environment variables from .env
 
 const app = express();
@@ -35,6 +36,9 @@ db.once("open", () => {
 app.use("/booking", bookingRoutes);
 app.use("/auth", authRoutes);
 app.use("/rooms", roomRoutes);
+
+// Serve static files from the "uploads" directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Start the server
 app.listen(port, () => {
